@@ -4,7 +4,61 @@
 
 Sometimes objects can perform heavy initializations that take time. It is nice to have an option to await until the object is ready to use.
 
-### Simple usage
+### Usage
+
+To make your object "ensure-initializable", add a `EnsureInitialized` mixin:
+
+```dart
+class YourObject with EnsureInitialized {
+  /* Body */
+}
+```
+
+Do heavy work in some init method. After it is end, call `initializedSuccessfully`:
+
+```dart
+Future<void> init() async {
+  await Future.delayed(const Duration(seconds: 3));
+  
+  initializedSuccessfully();
+}
+```
+
+Or, if there was an error, call `initializedWithError`:
+
+```dart
+Future<void> init() async {
+ try {
+    await _heavyComputations();
+
+    initializedSuccessfully();
+  } on Exception catch (e, s) {
+    initializedWithError(error: e, stackTrace: s);
+  }
+}
+```
+
+Calling the `init` method (or any method that initializes your object) can be done either in a constructor, when registering the object in the DI or wherever it is needed to be initialized. Like so:
+
+```dart
+final yourObject = YourObject();
+
+yourObject.init(); // without awaiting, so the DI will be ready to provide users with your object.
+
+DI.register<YourObject>(yourObject);
+```
+
+Then, in code, ensure your object is initialized before using it:
+
+```
+final yourObject = DI.resolve<YourObject>();
+
+await yourObject.ensureInitialized;
+
+yourObject.doSomeStuff();
+```
+
+### In-Code Example
 
 ```dart
 class HeavyInitialComputations with EnsureInitialized {
@@ -51,7 +105,7 @@ Future main(List<String> args) async {
 }
 ```
 
-### Simple usage with result
+### In-Code Example with a Result
 
 Yep, sometimes it makes sense to retrieve a result from those heavy initialization steps. To do so, you can use `EnsureInitializedResult`:
 ```dart
