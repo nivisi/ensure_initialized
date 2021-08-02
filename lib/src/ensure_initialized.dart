@@ -39,6 +39,10 @@ mixin EnsureInitialized {
   /// The method that marks the object has been initialized successfully.
   @protected
   void initializedSuccessfully() {
+    if (_completer.isCompleted) {
+      throw EnsureInitializedException('Object was already initialized');
+    }
+
     _completer.complete();
   }
 
@@ -53,6 +57,10 @@ mixin EnsureInitialized {
       error != null && message == null || error == null && message != null,
       'You must provide either an error or a message',
     );
+
+    if (_completer.isCompleted) {
+      throw EnsureInitializedException('Object was already initialized');
+    }
 
     if (error == null) {
       _completer.completeError(

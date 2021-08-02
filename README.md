@@ -160,5 +160,5 @@ Future main(List<String> args) async {
 ```
 
 <!-- References -->
-[pub-version-img]: https://img.shields.io/badge/pub-v0.0.1+2-green
+[pub-version-img]: https://img.shields.io/badge/pub-v0.0.2-green
 [pub-version-url]: https://pub.dev/packages/ensure_initialized

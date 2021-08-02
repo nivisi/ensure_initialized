@@ -42,7 +42,7 @@ mixin EnsureInitializedResult<T> {
   @protected
   void initializedSuccessfully(T result) {
     if (_completer.isCompleted) {
-      return;
+      throw EnsureInitializedException('Object was already initialized');
     }
 
     _completer.complete(result);
@@ -59,6 +59,10 @@ mixin EnsureInitializedResult<T> {
       error != null && message == null || error == null && message != null,
       'You must provide either an error or a message',
     );
+
+    if (_completer.isCompleted) {
+      throw EnsureInitializedException('Object was already initialized');
+    }
 
     if (error == null) {
       _completer.completeError(
