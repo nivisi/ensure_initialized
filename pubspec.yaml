@@ -7,5 +7,5 @@ repository: https://github.com/nivisi/ensure_initialized
 environment:
   sdk: ">=2.12.0 <3.0.0"
 
-dev_dependencies:
+dependencies:
   meta: ^1.7.0
