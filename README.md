@@ -1,5 +1,7 @@
 # ensure_initialized
 
+[![pub version][pub-version-img]][pub-version-url]
+
 Sometimes objects can perform heavy initializations that take time. It is nice to have an option to await until the object is ready to use.
 
 ### Simple usage
@@ -100,3 +102,7 @@ Future main(List<String> args) async {
   }
 }
 ```
+
+<!-- References -->
+[pub-version-img]: https://img.shields.io/badge/pub-v0.0.1-green
+[pub-version-url]: https://pub.dev/packages/ensure_initialized
