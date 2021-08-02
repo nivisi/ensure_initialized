@@ -40,7 +40,7 @@ Future<void> init() async {
 }
 ```
 
-Calling the `init` method (or any method that initializes your object) can be done either in a constructor, when registering the object in the DI or wherever it is needed to be initialized. Like so:
+Calling the `init` method (or any method that initializes your object) can be done either in a constructor, when registering the object in the DI or anywhere else it has to be initialized. Like so:
 
 ```dart
 final yourObject = YourObject();
