@@ -1,5 +1,5 @@
 name: ensure_initialized
-version: 0.0.1
+version: 0.0.1+1
 description: Allows to await for initialization before using an object.
 homepage: https://github.com/nivisi/ensure_initialized
 repository: https://github.com/nivisi/ensure_initialized
