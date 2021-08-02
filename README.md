@@ -6,7 +6,7 @@ Sometimes objects can perform heavy initializations that take time. It is nice t
 
 ### Usage
 
-To make your object "ensure-initializable", add a `EnsureInitialized` mixin:
+To make your object "ensure-initializable", add the `EnsureInitialized` mixin:
 
 ```dart
 class YourObject with EnsureInitialized {
@@ -14,7 +14,7 @@ class YourObject with EnsureInitialized {
 }
 ```
 
-Do heavy work in some init method. After it is end, call `initializedSuccessfully`:
+Do heavy work in some init method. After it is done, call `initializedSuccessfully`:
 
 ```dart
 Future<void> init() async {
@@ -34,6 +34,8 @@ Future<void> init() async {
     initializedSuccessfully();
   } on Exception catch (e, s) {
     initializedWithError(error: e, stackTrace: s);
+    // Or use message property:
+    // initializedWithError(message: 'Something went wrong ...', stackTrace: s);
   }
 }
 ```
@@ -158,5 +160,5 @@ Future main(List<String> args) async {
 ```
 
 <!-- References -->
-[pub-version-img]: https://img.shields.io/badge/pub-v0.0.1-green
+[pub-version-img]: https://img.shields.io/badge/pub-v0.0.1+2-green
 [pub-version-url]: https://pub.dev/packages/ensure_initialized
