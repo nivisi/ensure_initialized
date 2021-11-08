@@ -1,6 +1,4 @@
-# ensure_initialized
-
-[![pub version][pub-version-img]][pub-version-url]
+# ensure_initialized [![pub version][pub-version-img]][pub-version-url]
 
 Sometimes objects can perform heavy initializations that take time. It is nice to have an option to await until the object is ready to use.
 
