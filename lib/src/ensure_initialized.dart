@@ -99,8 +99,7 @@ mixin EnsureInitialized {
       await future();
 
       initializedSuccessfully();
-    } catch (e, s) {
-      if (callInitializedWithErrorOnError) {
+    } on Exception catch (e, s) {
       if (callInitializedWithErrorOnException) {
         initializedWithError(error: e, stackTrace: s);
       }
