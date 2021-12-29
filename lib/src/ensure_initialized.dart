@@ -74,4 +74,13 @@ mixin EnsureInitialized {
       );
     }
   }
+
+  @protected
+  void markAsUninitialized() {
+    if (!_completer.isCompleted) {
+      throw EnsureInitializedException('Object was not initialized yet');
+    }
+
+    _completer = Completer();
+  }
 }
