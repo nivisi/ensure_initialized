@@ -32,7 +32,7 @@ import 'ensure_initialized_exception.dart';
 /// }
 /// ```
 mixin EnsureInitialized {
-  final Completer<void> _completer = Completer<void>();
+  Completer<void> _completer = Completer<void>();
 
   Future<void> get ensureInitialized => _completer.future;
 
