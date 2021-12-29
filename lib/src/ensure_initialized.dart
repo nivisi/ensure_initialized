@@ -89,7 +89,7 @@ mixin EnsureInitialized {
   @protected
   Future reinitialize(
     Future Function() future, [
-    bool callInitializedWithErrorOnError = true,
+    bool callInitializedWithErrorOnException = true,
   ]) async {
     if (isInitialized) {
       throw EnsureInitializedException('Object was not initialized yet');
@@ -101,6 +101,7 @@ mixin EnsureInitialized {
       initializedSuccessfully();
     } catch (e, s) {
       if (callInitializedWithErrorOnError) {
+      if (callInitializedWithErrorOnException) {
         initializedWithError(error: e, stackTrace: s);
       }
 
