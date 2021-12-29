@@ -85,4 +85,26 @@ mixin EnsureInitialized {
 
     _completer = Completer();
   }
+
+  @protected
+  Future reinitialize(
+    Future Function() future, [
+    bool callInitializedWithErrorOnError = true,
+  ]) async {
+    if (isInitialized) {
+      throw EnsureInitializedException('Object was not initialized yet');
+    }
+
+    try {
+      await future();
+
+      initializedSuccessfully();
+    } catch (e, s) {
+      if (callInitializedWithErrorOnError) {
+        initializedWithError(error: e, stackTrace: s);
+      }
+
+      rethrow;
+    }
+  }
 }
