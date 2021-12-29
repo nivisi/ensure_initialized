@@ -36,10 +36,12 @@ mixin EnsureInitialized {
 
   Future<void> get ensureInitialized => _completer.future;
 
+  bool get isInitialized => _completer.isCompleted;
+
   /// The method that marks the object has been initialized successfully.
   @protected
   void initializedSuccessfully() {
-    if (_completer.isCompleted) {
+    if (isInitialized) {
       throw EnsureInitializedException('Object was already initialized');
     }
 
@@ -77,7 +79,7 @@ mixin EnsureInitialized {
 
   @protected
   void markAsUninitialized() {
-    if (!_completer.isCompleted) {
+    if (!isInitialized) {
       throw EnsureInitializedException('Object was not initialized yet');
     }
 
