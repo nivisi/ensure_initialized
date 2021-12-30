@@ -109,19 +109,21 @@ mixin EnsureInitialized {
       throw EnsureInitializedException('Object was not initialized yet');
     }
 
-    reinitialize(() async {}, callInitializedWithErrorOnException: true);
-
     _completer = Completer();
   }
 
   /// Allows to reinitialize the object with the call of the given future.
   ///
-  /// Marks the object as not initialized during the execution of the [future]. If
-  /// the future throws an error, it will be rethrown.
+  /// - [future] is a future to execute during reinitialization.
   ///
-  /// [callInitializedWithErrorOnException] indicates whether to call [initializedWithError]
-  /// on Exception or not. For example, you can capture the exception,
-  /// handle it and then decide if [initializedWithError] should be called or not.
+  ///   Before executing it, the object will be marked as not initialized.
+  ///   If [future] throws an exception, it will be rethrown to the caller.
+  ///
+  /// - [callInitializedWithErrorOnException] indicates whether to call [initializedWithError]
+  /// on Exception or not.
+  ///
+  ///    For example, you can capture the exception, handle it and then
+  ///    decide if [initializedWithError] should be called or not.
   ///
   /// Throws:
   /// - [EnsureInitializedException] if object was not initialized yet.
@@ -130,7 +132,7 @@ mixin EnsureInitialized {
     Future Function() future, {
     bool callInitializedWithErrorOnException = true,
   }) async {
-    if (isInitialized) {
+    if (!isInitialized) {
       throw EnsureInitializedException('Object was not initialized yet');
     }
 
