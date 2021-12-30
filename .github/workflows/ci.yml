@@ -1,9 +1,9 @@
-name: ⚙️ CI 
+name: ⚙️ CI
 
 on:
   push:
     branches: [ develop ]
-    paths: 
+    paths:
       - lib/**
       - .github/workflows/ci.yml
       - main.dart
