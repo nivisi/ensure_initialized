@@ -3,10 +3,15 @@ import 'dart:async';
 import 'package:ensure_initialized/ensure_initialized.dart';
 
 Future main(List<String> args) async {
-  print('=== W/O Result ===');
-  print('');
+  print('=== W/O Result ===\n');
   // Resolve it from a DI or so
   final heavyInitialComputations = HeavyInitialComputations();
+
+  heavyInitialComputations.whenInitialized.listen(
+    (_) {
+      print('\nWhen Initialized is Fired!\n');
+    },
+  );
 
   try {
     print('Calling doSomething ...');
@@ -20,12 +25,19 @@ Future main(List<String> args) async {
     print(s);
   }
 
-  print('');
-  print('=== W/ Result ===');
-  print('');
+  // Await for the event to fire before testing the object with result.
+  await Future.delayed(Duration(milliseconds: 500));
+
+  print('\n=== W/ Result ===\n');
 
   // Resolve it from a DI or so
   final heavyInitialComputationsResult = HeavyInitialComputationsResult();
+  heavyInitialComputationsResult.whenInitialized.listen(
+    (result) {
+      print(
+          '\nWhen Initialized with result is Fired! The result is: $result\n');
+    },
+  );
 
   try {
     print('Calling doSomething ...');
@@ -96,6 +108,6 @@ class HeavyInitialComputationsResult with EnsureInitializedResult<String> {
   Future<String> doSomething() async {
     final initResult = await ensureInitialized;
 
-    return initResult.toUpperCase();
+    return 'Upper cased: ${initResult.toUpperCase()}';
   }
 }
