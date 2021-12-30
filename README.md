@@ -1,5 +1,7 @@
 # ensure_initialized [![pub version][pub-version-img]][pub-version-url]
 
+[![CodeFactor][code-factor--badge-url]][code-factor-app-url]
+
 Sometimes objects can perform heavy initializations that take time. It is nice to have an option to await until the object is ready to use.
 
 ### Usage
@@ -160,3 +162,5 @@ Future main(List<String> args) async {
 <!-- References -->
 [pub-version-img]: https://img.shields.io/badge/pub-v0.0.3-green
 [pub-version-url]: https://pub.dev/packages/ensure_initialized
+[code-factor--badge-url]: https://www.codefactor.io/repository/github/nivisi/ensure_initialized/badge
+[code-factor-app-url]: https://www.codefactor.io/repository/github/nivisi/ensure_initialized
