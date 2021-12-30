@@ -4,9 +4,9 @@ import 'package:meta/meta.dart';
 
 import 'ensure_initialized_exception.dart';
 
-/// A mixin that allows to track whether the object is ready for usage.
+/// Allows to track whether the object is ready for usage.
 ///
-/// Sometimes it is nice to wait for some heavy initialization process before using the object.
+/// Sometimes it is nice to wait for some heavy initialization process before using an object.
 /// Instead of implementing some kind of booleans, we can use futures instead.
 ///
 /// Example:
@@ -38,7 +38,10 @@ mixin EnsureInitialized {
 
   bool get isInitialized => _completer.isCompleted;
 
-  /// The method that marks the object has been initialized successfully.
+  /// Marks that the object has been initialized successfully.
+  ///
+  /// Throws:
+  /// - [EnsureInitializedException] if object was already initialized.
   @protected
   void initializedSuccessfully() {
     if (isInitialized) {
@@ -48,19 +51,37 @@ mixin EnsureInitialized {
     _completer.complete();
   }
 
-  /// The method that marks the object was initialized with an error.
+  /// Marks that the object was initialized with an error.
+  ///
+  /// - If [error] is provided, it will be rethrown by [ensureInitialized].
+  /// - If [message] is provided, it will be wrapped in a [EnsureInitializedException]
+  /// and this exception will be rethrown by [ensureInitialized].
+  /// - If [stackTrace] is provided, it will set as a StackTrace for the error.
+  ///
+  /// Preferably, provide either an [error] or a [message].
+  /// If both of them are not null, [message] will be ignored.
+  ///
+  /// Throws:
+  /// - [EnsureInitializedException] if object was already initialized.
+  /// - [EnsureInitializedException] if both [error] and [message] were not provided.
   @protected
   void initializedWithError({
     Object? error,
     String? message,
     StackTrace? stackTrace,
   }) {
+    if (error == null && message == null) {
+      throw EnsureInitializedException(
+        'You must provide either an error or a message',
+      );
+    }
+
     assert(
       error != null && message == null || error == null && message != null,
       'You must provide either an error or a message',
     );
 
-    if (_completer.isCompleted) {
+    if (isInitialized) {
       throw EnsureInitializedException('Object was already initialized');
     }
 
@@ -77,23 +98,43 @@ mixin EnsureInitialized {
     }
   }
 
+  /// Marks that the object is again not initialized. After this, you can call
+  /// [initializedSuccessfully] again.
+  ///
+  /// Throws:
+  /// - [EnsureInitializedException] if object was not initialized yet.
   @protected
   void markAsUninitialized() {
     if (!isInitialized) {
       throw EnsureInitializedException('Object was not initialized yet');
     }
 
+    reinitialize(() async {}, callInitializedWithErrorOnException: true);
+
     _completer = Completer();
   }
 
+  /// Allows to reinitialize the object with the call of the given future.
+  ///
+  /// Marks the object as not initialized during the execution of the [future]. If
+  /// the future throws an error, it will be rethrown.
+  ///
+  /// [callInitializedWithErrorOnException] indicates whether to call [initializedWithError]
+  /// on Exception or not. For example, you can capture the exception,
+  /// handle it and then decide if [initializedWithError] should be called or not.
+  ///
+  /// Throws:
+  /// - [EnsureInitializedException] if object was not initialized yet.
   @protected
   Future reinitialize(
-    Future Function() future, [
+    Future Function() future, {
     bool callInitializedWithErrorOnException = true,
-  ]) async {
+  }) async {
     if (isInitialized) {
       throw EnsureInitializedException('Object was not initialized yet');
     }
+
+    markAsUninitialized();
 
     try {
       await future();
