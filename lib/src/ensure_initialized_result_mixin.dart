@@ -11,7 +11,7 @@ import 'ensure_initialized_exception.dart';
 ///
 /// Example:
 /// ```dart
-/// class SomeClass with EnsureInitialized<int> {
+/// class SomeClass with EnsureInitializedResultMixin<int> {
 ///   SomeClass() {
 ///     _init();
 ///   }
@@ -28,12 +28,12 @@ import 'ensure_initialized_exception.dart';
 ///
 ///       initializedSuccessfully(result);
 ///     } on Exception catch (e, s) {
-///       unableToInitialize(e, s);
+///       initializedWithError(error: e, stackTrace: s);
 ///     }
 ///   }
 /// }
 /// ```
-mixin EnsureInitializedResult<T> {
+mixin EnsureInitializedResultMixin<T> {
   Completer<T> _completer = Completer<T>();
 
   final StreamController<T> _whenInitializedStreamController =

@@ -52,7 +52,7 @@ Future main(List<String> args) async {
   }
 }
 
-class HeavyInitialComputations with EnsureInitialized {
+class HeavyInitialComputations with EnsureInitializedMixin {
   HeavyInitialComputations() {
     // Call initialization method in constructor,
     // or make it public and call it during creation in the DI.
@@ -81,7 +81,7 @@ class HeavyInitialComputations with EnsureInitialized {
   }
 }
 
-class HeavyInitialComputationsResult with EnsureInitializedResult<String> {
+class HeavyInitialComputationsResult with EnsureInitializedResultMixin<String> {
   HeavyInitialComputationsResult() {
     // Call initialization method in constructor,
     // or make it public and call it during creation in the DI.
