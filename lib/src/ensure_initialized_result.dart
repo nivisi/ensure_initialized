@@ -36,8 +36,30 @@ import 'ensure_initialized_exception.dart';
 mixin EnsureInitializedResult<T> {
   Completer<T> _completer = Completer<T>();
 
+  final StreamController<T> _whenInitializedStreamController =
+      StreamController<T>.broadcast();
+  final StreamController<void> _whenUninitializedStreamController =
+      StreamController<void>.broadcast();
+
+  /// Released when [initializedSuccessfully] is called.
+  /// Returns the result of initialization.
+  /// If [initializedWithError] is called, throws the given exception.
   Future<T> get ensureInitialized => _completer.future;
 
+  /// Fired when [initializedSuccessfully] is called.
+  /// The event would be the result of initialization.
+  /// If [initializedWithError] is called, the given exception is passed to the
+  /// `onError` callback.
+  Stream<T> get whenInitialized => _whenInitializedStreamController.stream;
+
+  /// Fired when [markAsUninitialized] is called.
+  ///
+  /// Note that it will also be fired during the [reinitialize] method
+  /// as it executes [markAsUninitialized].
+  Stream<void> get whenUninitialized =>
+      _whenUninitializedStreamController.stream;
+
+  /// Simply checks if the object is initialized at the moment.
   bool get isInitialized => _completer.isCompleted;
 
   /// Marks that the object has been initialized successfully.
@@ -53,6 +75,7 @@ mixin EnsureInitializedResult<T> {
     }
 
     _completer.complete(result);
+    _whenInitializedStreamController.add(result);
   }
 
   /// Marks that the object was initialized with an error.
@@ -90,15 +113,19 @@ mixin EnsureInitializedResult<T> {
     }
 
     if (error == null) {
+      final exception = EnsureInitializedException(message!);
+
       _completer.completeError(
-        EnsureInitializedException(message!),
+        exception,
         stackTrace,
       );
+      _whenInitializedStreamController.addError(exception);
     } else {
       _completer.completeError(
         error,
         stackTrace,
       );
+      _whenInitializedStreamController.addError(error);
     }
   }
 
@@ -114,6 +141,7 @@ mixin EnsureInitializedResult<T> {
     }
 
     _completer = Completer<T>();
+    _whenUninitializedStreamController.add(null);
   }
 
   /// Allows to reinitialize the object with the call of the given future.
