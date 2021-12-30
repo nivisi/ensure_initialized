@@ -61,6 +61,7 @@ class HeavyInitialComputations with EnsureInitialized {
     }
   }
 
+  /// This method waits for the object to be initialized before doing its stuff.
   Future<int> doSomething() async {
     await ensureInitialized;
 
@@ -91,6 +92,7 @@ class HeavyInitialComputationsResult with EnsureInitializedResult<String> {
     }
   }
 
+  /// This method waits for the object to be initialized before doing its stuff.
   Future<String> doSomething() async {
     final initResult = await ensureInitialized;
 
