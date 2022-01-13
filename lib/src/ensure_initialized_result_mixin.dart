@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import 'ensure_initialized_exception.dart';
+import 'error_messages/error_messages.dart';
 
 /// Allows to track whether the object is ready for usage.
 ///
@@ -72,7 +73,7 @@ mixin EnsureInitializedResultMixin<T> {
   @visibleForTesting
   void initializedSuccessfully(T result) {
     if (isInitialized) {
-      throw EnsureInitializedException('Object was already initialized');
+      throw EnsureInitializedException(alreadyInitializedMessage);
     }
 
     _completer.complete(result);
@@ -101,17 +102,17 @@ mixin EnsureInitializedResultMixin<T> {
   }) {
     if (error == null && message == null) {
       throw EnsureInitializedException(
-        'You must provide either an error or a message',
+        mustProvideEitherMessageOrErrorMessage,
       );
     }
 
     assert(
       error != null && message == null || error == null && message != null,
-      'You must provide either an error or a message',
+      mustProvideEitherMessageOrErrorMessage,
     );
 
     if (isInitialized) {
-      throw EnsureInitializedException('Object was already initialized');
+      throw EnsureInitializedException(alreadyInitializedMessage);
     }
 
     if (error == null) {
@@ -140,7 +141,7 @@ mixin EnsureInitializedResultMixin<T> {
   @visibleForTesting
   void markAsUninitialized() {
     if (!isInitialized) {
-      throw EnsureInitializedException('Object was not initialized yet');
+      throw EnsureInitializedException(wasNotInitializedYetMessage);
     }
 
     _completer = Completer<T>();
@@ -172,7 +173,7 @@ mixin EnsureInitializedResultMixin<T> {
     bool callInitializedWithErrorOnException = true,
   }) async {
     if (!isInitialized) {
-      throw EnsureInitializedException('Object was not initialized yet');
+      throw EnsureInitializedException(wasNotInitializedYetMessage);
     }
 
     markAsUninitialized();
