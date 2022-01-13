@@ -69,6 +69,7 @@ mixin EnsureInitializedResultMixin<T> {
   /// Throws:
   /// - [EnsureInitializedException] if object was already initialized.
   @protected
+  @visibleForTesting
   void initializedSuccessfully(T result) {
     if (isInitialized) {
       throw EnsureInitializedException('Object was already initialized');
@@ -92,6 +93,7 @@ mixin EnsureInitializedResultMixin<T> {
   /// - [EnsureInitializedException] if object was already initialized.
   /// - [EnsureInitializedException] if both [error] and [message] were not provided.
   @protected
+  @visibleForTesting
   void initializedWithError({
     Object? error,
     String? message,
@@ -135,6 +137,7 @@ mixin EnsureInitializedResultMixin<T> {
   /// Throws:
   /// - [EnsureInitializedException] if object was not initialized yet.
   @protected
+  @visibleForTesting
   void markAsUninitialized() {
     if (!isInitialized) {
       throw EnsureInitializedException('Object was not initialized yet');
@@ -163,6 +166,7 @@ mixin EnsureInitializedResultMixin<T> {
   /// Throws:
   /// - [EnsureInitializedException] if object was not initialized yet.
   @protected
+  @visibleForTesting
   Future reinitialize(
     Future<T> Function() future, {
     bool callInitializedWithErrorOnException = true,
