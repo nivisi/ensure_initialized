@@ -36,3 +36,16 @@ jobs:
 
       - name: Analyze
         run: dart analyze .
+
+      # TODO: Skip if not a PR
+
+      - name: Run Tests
+        run: dart test --coverage coverage
+
+      - name: Coverage
+        run: dart run coverage:format_coverage -l -i ./coverage/test/ensure_initialized_test.dart.vm.json -o ./coverage/lcov.info
+
+      - name: Upload coverage to codecov
+        uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: true
