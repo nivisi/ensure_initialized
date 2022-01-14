@@ -41,7 +41,7 @@ jobs:
 
       - name: Run Tests
         run: dart test --coverage coverage
-        
+
       - name: Activate Coverage
         run: dart pub global activate coverage
 
