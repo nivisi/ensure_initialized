@@ -41,6 +41,9 @@ jobs:
 
       - name: Run Tests
         run: dart test --coverage coverage
+        
+      - name: Activate Coverage
+        run: dart pub global activate coverage
 
       - name: Check Coverage
         run: dart pub global run coverage:format_coverage --packages=.packages --report-on=lib --lcov -o coverage/lcov.info -i coverage --check-ignore
