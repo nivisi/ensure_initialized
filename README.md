@@ -1,8 +1,6 @@
 # ensure_initialized [![pub version][pub-version-img]][pub-version-url]
 
-[![⚙️ CI][ci-badge-url]][ci-url]
-
-[![CodeFactor][code-factor--badge-url]][code-factor-app-url] 
+[![⚙️ CI][ci-badge-url]][ci-url] [![CodeFactor][code-factor--badge-url]][code-factor-app-url]  [![codecov][codecov-badge-url]][codecov-url]
 
 Sometimes objects can perform heavy initializations that take time. It is nice to have an option to await until the object is ready to use.
 
@@ -170,3 +168,6 @@ Future main(List<String> args) async {
 
 [ci-badge-url]: https://github.com/nivisi/ensure_initialized/actions/workflows/ci.yml/badge.svg
 [ci-url]: https://github.com/nivisi/ensure_initialized/actions/workflows/ci.yml
+
+[codecov-badge-url]: https://codecov.io/gh/nivisi/ensure_initialized/branch/develop/graph/badge.svg?token=80NZYCFQH3
+[codecov-url]: https://codecov.io/gh/nivisi/ensure_initialized
