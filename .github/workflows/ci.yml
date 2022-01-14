@@ -42,8 +42,11 @@ jobs:
       - name: Run Tests
         run: dart test --coverage coverage
 
-      - name: Coverage
-        run: dart run coverage:format_coverage -l -i ./coverage/test/ensure_initialized_test.dart.vm.json -o ./coverage/lcov.info
+      - name: Activate Coverage
+        run: dart pub global activate coverage
+
+      - name: Check Coverage
+        run: dart pub global run coverage:format_coverage --packages=.packages --report-on=lib --lcov -o coverage/lcov.info -i coverage --check-ignore
 
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v1
