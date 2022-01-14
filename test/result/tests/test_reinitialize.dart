@@ -2,13 +2,13 @@ import 'package:ensure_initialized/ensure_initialized.dart';
 import 'package:ensure_initialized/src/error_messages/error_messages.dart';
 import 'package:test/test.dart';
 
-import 'src/result_initializable_object.dart';
+import '../src/result_initializable_object.dart';
 
 void test_reinitialize() {
   group('when reinitialize is called', () {
     group('and object was not initialized yet', () {
       test('must throw an EnsureInitializedException', () {
-        final object = InitializableObject();
+        final object = ResultInitializableObject();
 
         expect(
           () => object.reinitialize(() async => 0),
@@ -28,9 +28,10 @@ void test_reinitialize() {
         test('streams must emit events in order', () {
           const whenUninitialized = 'whenUninitialized';
           const whenInitialized = 'whenInitialized';
+          final expectedReinitResult = 5;
 
-          final object = InitializableObject();
-          object.initializedSuccessfully();
+          final object = ResultInitializableObject();
+          object.initializedSuccessfully(0);
 
           final emitted = <String>[];
 
@@ -54,49 +55,57 @@ void test_reinitialize() {
               }
 
               emitted.add(whenInitialized);
-              return true;
+              return event == expectedReinitResult;
             })),
           );
 
-          object.reinitialize(() async {});
+          object.reinitialize(() async => expectedReinitResult);
         });
 
         test('whenUninitialized must emit an event with the given result', () {
-          final object = InitializableObject();
-          object.initializedSuccessfully();
+          final expectedReinitResult = 5;
+
+          final object = ResultInitializableObject();
+          object.initializedSuccessfully(0);
 
           expectLater(object.whenUninitialized, emits(null));
 
-          object.reinitialize(() async {});
+          object.reinitialize(() async => expectedReinitResult);
         });
 
         test('whenInitialized must emit an event', () {
-          final object = InitializableObject();
-          object.initializedSuccessfully();
+          final expectedReinitResult = 5;
 
-          expectLater(object.whenInitialized, emits(null));
+          final object = ResultInitializableObject();
+          object.initializedSuccessfully(0);
 
-          object.reinitialize(() async {});
+          expectLater(object.whenInitialized, emits(expectedReinitResult));
+
+          object.reinitialize(() async => expectedReinitResult);
         });
 
-        test('ensureInitialized must be completed', () async {
-          final object = InitializableObject();
-          object.initializedSuccessfully();
+        test('ensureInitialized must return the given result', () async {
+          const expectedResult = 10;
+
+          final object = ResultInitializableObject();
+          object.initializedSuccessfully(0);
 
           object.reinitialize(
-            () async {},
+            () async => expectedResult,
             callInitializedWithErrorOnException: true,
           );
 
-          expect(object.ensureInitialized, completes);
+          final actualResult = await object.ensureInitialized;
+
+          expect(actualResult, equals(expectedResult));
         });
 
         test('isInitialized must be true', () async {
-          final object = InitializableObject();
-          object.initializedSuccessfully();
+          final object = ResultInitializableObject();
+          object.initializedSuccessfully(0);
 
           await object.reinitialize(
-            () async {},
+            () async => 5,
             callInitializedWithErrorOnException: true,
           );
 
@@ -109,8 +118,8 @@ void test_reinitialize() {
           test('the call must throw the given Exception', () async {
             const exception = FormatException();
 
-            final object = InitializableObject();
-            object.initializedSuccessfully();
+            final object = ResultInitializableObject();
+            object.initializedSuccessfully(0);
 
             expect(
               () => object.reinitialize(
@@ -131,8 +140,8 @@ void test_reinitialize() {
             const whenInitialized = 'whenInitialized';
             const exception = FormatException();
 
-            final object = InitializableObject();
-            object.initializedSuccessfully();
+            final object = ResultInitializableObject();
+            object.initializedSuccessfully(0);
 
             final emitted = <String>[];
 
@@ -176,8 +185,8 @@ void test_reinitialize() {
           test('whenUninitialized must emit an event', () {
             final expectedReinitResult = 5;
 
-            final object = InitializableObject();
-            object.initializedSuccessfully();
+            final object = ResultInitializableObject();
+            object.initializedSuccessfully(0);
 
             expectLater(object.whenUninitialized, emits(null));
 
@@ -192,8 +201,8 @@ void test_reinitialize() {
             () async {
               const exception = FormatException();
 
-              final object = InitializableObject();
-              object.initializedSuccessfully();
+              final object = ResultInitializableObject();
+              object.initializedSuccessfully(0);
 
               expectLater(object.whenInitialized, emitsError(exception));
 
@@ -214,8 +223,8 @@ void test_reinitialize() {
           test('ensureInitialized must throw the given Exception', () async {
             const exception = FormatException();
 
-            final object = InitializableObject();
-            object.initializedSuccessfully();
+            final object = ResultInitializableObject();
+            object.initializedSuccessfully(0);
 
             try {
               await object.reinitialize(
@@ -235,8 +244,8 @@ void test_reinitialize() {
           test('isInitialized must be true', () async {
             const exception = FormatException();
 
-            final object = InitializableObject();
-            object.initializedSuccessfully();
+            final object = ResultInitializableObject();
+            object.initializedSuccessfully(0);
 
             try {
               await object.reinitialize(
@@ -258,8 +267,10 @@ void test_reinitialize() {
           test(
             'whenInitialized must emit an event only after being initialized',
             () async {
-              final object = InitializableObject();
-              object.initializedSuccessfully();
+              const laterInitializationResult = 1912;
+
+              final object = ResultInitializableObject();
+              object.initializedSuccessfully(0);
 
               try {
                 await object.reinitialize(
@@ -272,16 +283,16 @@ void test_reinitialize() {
 
               await Future.delayed(const Duration(seconds: 1));
 
-              expect(object.whenInitialized, emits(null));
-              object.initializedSuccessfully();
+              expect(object.whenInitialized, emits(laterInitializationResult));
+              object.initializedSuccessfully(laterInitializationResult);
             },
           );
 
           test(
             'ensureInitialized does not complete',
             () async {
-              final object = InitializableObject();
-              object.initializedSuccessfully();
+              final object = ResultInitializableObject();
+              object.initializedSuccessfully(0);
 
               try {
                 await object.reinitialize(
@@ -297,8 +308,8 @@ void test_reinitialize() {
           );
 
           test('isInitialized must be false', () async {
-            final object = InitializableObject();
-            object.initializedSuccessfully();
+            final object = ResultInitializableObject();
+            object.initializedSuccessfully(0);
 
             try {
               await object.reinitialize(

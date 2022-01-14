@@ -2,18 +2,18 @@ import 'package:ensure_initialized/ensure_initialized.dart';
 import 'package:ensure_initialized/src/error_messages/error_messages.dart';
 import 'package:test/test.dart';
 
-import 'src/result_initializable_object.dart';
+import '../src/result_initializable_object.dart';
 
 void test_initializedSuccessfully() {
   group('when initializedSuccessfully is called', () {
     group('and object was already initialized', () {
       test('must throw an EnsureInitializedError', () {
-        final object = InitializableObject();
+        final object = ResultInitializableObject();
 
-        object.initializedSuccessfully();
+        object.initializedSuccessfully(0);
 
         expect(
-          () => object.initializedSuccessfully(),
+          () => object.initializedSuccessfully(0),
           throwsA(
             isA<EnsureInitializedException>().having(
               (e) => e.message,
@@ -25,10 +25,10 @@ void test_initializedSuccessfully() {
       });
 
       test('isInitilized must remain true', () {
-        final object = InitializableObject();
-        object.initializedSuccessfully();
+        final object = ResultInitializableObject();
+        object.initializedSuccessfully(0);
         try {
-          object.initializedSuccessfully();
+          object.initializedSuccessfully(0);
         } catch (e) {
           // Catch it to prevent test from failing
         }
@@ -39,21 +39,23 @@ void test_initializedSuccessfully() {
 
     group('and object was not initialized yet', () {
       test(
-        'whenInitialized must emit an eventt',
+        'whenInitialized must emit an event with the given result',
         () async {
-          final object = InitializableObject();
+          const result = 19;
 
-          expectLater(object.whenInitialized, emits(null));
+          final object = ResultInitializableObject();
 
-          object.initializedSuccessfully();
+          expectLater(object.whenInitialized, emits(result));
+
+          object.initializedSuccessfully(result);
         },
       );
 
       test(
         'isInitialized must be set to true',
         () async {
-          final object = InitializableObject();
-          object.initializedSuccessfully();
+          final object = ResultInitializableObject();
+          object.initializedSuccessfully(0);
 
           expect(object.isInitialized, isTrue);
         },
@@ -62,10 +64,13 @@ void test_initializedSuccessfully() {
       test(
         'ensureInitialized must return the given result',
         () async {
-          final object = InitializableObject();
-          object.initializedSuccessfully();
+          const expectedResult = 0;
+          final object = ResultInitializableObject();
+          object.initializedSuccessfully(expectedResult);
 
-          expect(object.ensureInitialized, completes);
+          final actualResult = await object.ensureInitialized;
+
+          expect(actualResult, equals(expectedResult));
         },
       );
     });

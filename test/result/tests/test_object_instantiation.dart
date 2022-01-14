@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
 
-import 'src/result_initializable_object.dart';
+import '../src/result_initializable_object.dart';
 
 void test_objectInstantiation() {
   group('when object is instantiated,', () {

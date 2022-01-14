@@ -2,7 +2,7 @@ import 'package:ensure_initialized/ensure_initialized.dart';
 import 'package:ensure_initialized/src/error_messages/error_messages.dart';
 import 'package:test/test.dart';
 
-import 'src/result_initializable_object.dart';
+import '../src/result_initializable_object.dart';
 
 void test_initializedWithError() {
   group('when initializedWithError is called', () {
