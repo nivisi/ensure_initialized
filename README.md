@@ -2,19 +2,57 @@
 
 [![⚙️ CI][ci-badge-url]][ci-url] [![CodeFactor][code-factor--badge-url]][code-factor-app-url]  [![codecov][codecov-badge-url]][codecov-url]
 
-Sometimes objects can perform heavy initializations that take time. It is nice to have an option to await until the object is ready to use.
+Sometimes objects can perform heavy initialization or preparation that take some time. Until that is done, the object could be not ready for usage. This package allows to await for initialization, ensuring the object is ready to use.
 
-### Usage
+## Usage
 
-To make your object "ensure-initializable", add the `EnsureInitialized` mixin:
+Add the `EnsureInitializedMixin` mixin to a class:
 
 ```dart
-class YourObject with EnsureInitialized {
+class YourObject with EnsureInitializedMixin {
   /* Body */
 }
 ```
 
-Do heavy work in some init method. After it is done, call `initializedSuccessfully`:
+Now you can await for your object initialization:
+
+```dart
+final object = YourObject();
+
+await object.ensureInitialized;
+
+object.doSomethingAfterItIsReady();
+```
+
+If your initialization has some output value, you can use `EnsureInitializedResultMixin<T>`:
+
+```dart
+class YourObjectWithResult with EnsureInitializedResultMixin<int> {
+  /* Body */
+}
+
+final objectWithResult = YourObjectWithResult();
+
+final result = await objectWithResult.ensureInitialized;
+
+print(result);
+```
+
+You can also check whether your object was already initialized by reading the `isInitialized` property:
+
+```dart
+final object = YourObject();
+
+print(object.isInitialized); // false
+
+await object.init(); // this method calls `initializedSuccessfully` under the hood
+
+print(object.isInitialized); // true
+```
+
+### Successful Initialization
+
+`ensureInitialized` will be released after you call either `initializedSuccessfully`. Do it in your heavy initialization method:
 
 ```dart
 Future<void> init() async {
@@ -24,140 +62,140 @@ Future<void> init() async {
 }
 ```
 
-Or, if there was an error, call `initializedWithError`:
+If you use `EnsureInitializedResultMixin<T>`, you must pass a value of type `T` to the call:
+
+```dart
+initializedSuccessfully(5);
+```
+
+This value will be returned by the `ensureInitialized`:
+
+```dart
+final result = await objectWithResult.ensureInitialized;
+print(result); // prints 5
+```
+
+### Failed Initialization
+
+To mark that the object was initialized with an error, call `initializedWithError`. It can take a message, an exception and a stacktrace.
+
+Note: it is preferrable to use either a message or an exception. You'll get an assertion error in debug otherwise. In release the message will be ignored in case both values are specified.
 
 ```dart
 Future<void> init() async {
- try {
-    await _heavyComputations();
-
+  try {
+    await Future.delayed(const Duration(seconds: 3));
+    
     initializedSuccessfully();
   } on Exception catch (e, s) {
     initializedWithError(error: e, stackTrace: s);
-    // Or use message property:
-    // initializedWithError(message: 'Something went wrong ...', stackTrace: s);
+    // Or use message: initializedWithError(message: e.toString(), stackTrace: s);
   }
 }
 ```
 
-Calling the `init` method (or any method that initializes your object) can be done either in a constructor, when registering the object in the DI or anywhere else it has to be initialized. Like so:
+So `ensureInitialized` may throw the specified exception. It could be used as following:
 
 ```dart
-final yourObject = YourObject();
-
-yourObject.init(); // without awaiting, so the DI will be ready to provide users with your object.
-
-DI.register<YourObject>(yourObject);
+try {
+  await object.ensureInitialized;
+  
+  /* Do the happy path */
+} on Exception catch (e ,s) {
+  /* Log it and do the unhappy path */
+}
 ```
 
-Then, in code, ensure your object is initialized before using it:
+Note that calling `initializedWithError` also turns `isInitialized` to true.
 
-```
-final yourObject = DI.resolve<YourObject>();
+### Streams
 
-await yourObject.ensureInitialized;
-
-yourObject.doSomeStuff();
-```
-
-### In-Code Example
+There are `whenInitialized` and `whenUninitialized` streams that will raise an event when the object is initialized and uninitialized (later on about the latter):
 
 ```dart
-class HeavyInitialComputations with EnsureInitialized {
-  HeavyInitialComputations() {
-    // Call initialization method in constructor,
-    // or make it public and call it during creation in the DI.
+object.whenInitialized.listen((_) {
+  print('My object was initialized!');
+});
+```
+
+It can also be used with the result mixin. Then the event will be the result of initialization:
+
+```dart
+objectWithResult.whenInitialized.listen((result) {
+  print('My object was initialized with $result!');
+});
+```
+
+`whenInitialized` is fired any time `initializedSuccessfully` or `initializedWithError` are called. If the object was initialized with an error, this error will be added to the stream as well.
+
+`whenUninitialized` is fired any time the object is marked as uninitialized.
+
+### Reinitialization
+
+Sometimes it is needed to reinit an object. For instance, some service relies on the user service, that relies on what user is currently signed in. You can call `markAsUninitialized` to point that the object is not ready to be used again.
+
+```dart
+class UserService with EnsureInitializedMixin {
+  Future signIn(credentials) async {
+    /* Do sign in */
+    
+    initializedSuccessfully();
+  }
+  
+  Future signOut() async {
+    /* Do sign out */
+    
+    markAsUninitialized();
+  }
+}
+```
+
+Now, if you call `signOut`, the object will return to its initial state: `isInitialized` will be false and `ensureInitialized` will again be awaitable. It will also fire the `whenUninitialized` event.
+
+So now we can get notified about this in another service:
+
+```dart
+class ServiceThatReliesOnUserService with EnsureInitializedMixin {
+  final UserService userService;
+  
+  later final StreamSubscription _onInitializedSubscription;
+  later final StreamSubscription _onUninitializedSubscription;
+  
+  ServiceThatReliesOnUserService(this.userService) {
     _init();
   }
-
-  Future<void> _heavyComputations() async {
-    await Future.delayed(const Duration(seconds: 3));
+  
+  void _init() {
+    _onInitializedSubscription = userService.whenInitialized.listen(_whenUserServiceInitialized);
   }
-
-  Future<void> _init() async {
-    try {
-      await _heavyComputations();
-
-      initializedSuccessfully();
-    } on Exception catch (e, s) {
-      initializedWithError(error: e, stackTrace: s);
-    }
+  
+  void _whenUserServiceInitialized(_) {
+    /* Do something with userService */
+    initializedSuccessfully();
   }
-
-  Future<int> doSomething() async {
-    await ensureInitialized;
-
-    return 25;
+  
+  void _whenUserServiceUninitialized(_) {
+    markAsUninitialized();
   }
-}
-
-Future main(List<String> args) async {
-  // Resolve it from a DI or so
-  final heavyInitialComputations = HeavyInitialComputations();
-
-  try {
-    final data = await heavyInitialComputations.doSomething();
-
-    print(data);
-  } on Exception catch (e, s) {
-    print('Unable to do something');
-    print(e);
-    print(s);
+  
+  void dispose() {
+    _onInitializedSubscription.cancel();
+    _onUninitializedSubscription.cancel();
   }
 }
 ```
 
-### In-Code Example with a Result
+We can build chains with objects that rely on each other. Don'get overwhelmed, though!
 
-Yep, sometimes it makes sense to retrieve a result from those heavy initialization steps. To do so, you can use `EnsureInitializedResult`:
+Alternatively, you can use a `reinitialize` method that takes a future as a parameter. The object will be marked as uninitialized before the future starts and will be marked as initialized after it completes. 
+
 ```dart
-class HeavyInitialComputationsResult with EnsureInitializedResult<String> {
-  HeavyInitialComputationsResult() {
-    // Call initialization method in constructor,
-    // or make it public and call it during creation in the DI.
-    _init();
-  }
-
-  Future<String> _heavyComputations() async {
-    await Future.delayed(const Duration(seconds: 3));
-
-    return 'I am initialized!';
-  }
-
-  Future<void> _init() async {
-    try {
-      final result = await _heavyComputations();
-
-      initializedSuccessfully(result);
-    } on Exception catch (e, s) {
-      initializedWithError(error: e, stackTrace: s);
-    }
-  }
-
-  Future<String> doSomething() async {
-    final initResult = await ensureInitialized;
-
-    return initResult.toUpperCase();
-  }
-}
-
-Future main(List<String> args) async {
-  // Resolve it from a DI or so
-  final heavyInitialComputationsResult = HeavyInitialComputationsResult();
-
-  try {
-    print('Calling doSomething ...');
-
-    final data = await heavyInitialComputationsResult.doSomething();
-
-    print('doSomething result: $data');
-  } on Exception catch (e, s) {
-    print('Unable to do something');
-    print(e);
-    print(s);
-  }
+Future reinitMe() {
+  return reinitialize(() => Future.delayed(const Duration(seconds: 3)));
 }
 ```
+
+Note: if any exception occur, `reinitialize` will rethrow it. It also takes a flag `callInitializedWithErrorOnException` that indicates whether to call `initializedWithError` on exception.
 
 <!-- References -->
 [pub-version-img]: https://img.shields.io/badge/pub-v0.0.3-green
