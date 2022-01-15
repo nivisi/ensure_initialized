@@ -1,8 +1,10 @@
+// coverage:ignore-file
+
 import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import 'ensure_initialized_exception.dart';
+import '../ensure_initialized_exception.dart';
 
 /// A mixin that allows to track whether the object is ready for usage.
 ///
@@ -11,41 +13,40 @@ import 'ensure_initialized_exception.dart';
 ///
 /// Example:
 /// ```dart
-/// class SomeClass with EnsureInitialized<int> {
+/// class SomeClass with EnsureInitialized {
 ///   SomeClass() {
 ///     _init();
 ///   }
 ///
-///   Future<int> _heavyComputations() async {
+///   Future<void> _heavyComputations() async {
 ///     await Future.delayed(const Duration(seconds: 5));
-///
-///     return 0;
 ///   }
 ///
 ///   Future<void> _init() async {
 ///     try {
-///       final result = await _heavyComputations();
+///       await _heavyComputations();
 ///
-///       initializedSuccessfully(result);
+///       initializedSuccessfully();
 ///     } on Exception catch (e, s) {
 ///       unableToInitialize(e, s);
 ///     }
 ///   }
 /// }
 /// ```
-mixin EnsureInitializedResult<T> {
-  final Completer<T> _completer = Completer<T>();
+@Deprecated('Use EnsureInitializedMixin instead')
+mixin EnsureInitialized {
+  final Completer<void> _completer = Completer<void>();
 
-  Future<T> get ensureInitialized => _completer.future;
+  Future<void> get ensureInitialized => _completer.future;
 
   /// The method that marks the object has been initialized successfully.
   @protected
-  void initializedSuccessfully(T result) {
+  void initializedSuccessfully() {
     if (_completer.isCompleted) {
       throw EnsureInitializedException('Object was already initialized');
     }
 
-    _completer.complete(result);
+    _completer.complete();
   }
 
   /// The method that marks the object was initialized with an error.
