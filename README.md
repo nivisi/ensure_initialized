@@ -167,6 +167,7 @@ class ServiceThatReliesOnUserService with EnsureInitializedMixin {
   
   void _init() {
     _onInitializedSubscription = userService.whenInitialized.listen(_whenUserServiceInitialized);
+    _onUninitializedSubscription = userService.whenUninitialized.listen(_whenUserServiceUninitialized);
   }
   
   void _whenUserServiceInitialized(_) {
