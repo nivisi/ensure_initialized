@@ -158,8 +158,8 @@ So now we can get notified about this in another service:
 class ServiceThatReliesOnUserService with EnsureInitializedMixin {
   final UserService userService;
   
-  later final StreamSubscription _onInitializedSubscription;
-  later final StreamSubscription _onUninitializedSubscription;
+  late final StreamSubscription _onInitializedSubscription;
+  late final StreamSubscription _onUninitializedSubscription;
   
   ServiceThatReliesOnUserService(this.userService) {
     _init();
