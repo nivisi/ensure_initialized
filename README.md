@@ -199,7 +199,7 @@ Future reinitMe() {
 Note: if any exception occur, `reinitialize` will rethrow it. It also takes a flag `callInitializedWithErrorOnException` that indicates whether to call `initializedWithError` on exception.
 
 <!-- References -->
-[pub-version-img]: https://img.shields.io/badge/pub-v0.1.0-green
+[pub-version-img]: https://img.shields.io/badge/pub-v0.1.0-0175c2?logo=dart
 [pub-version-url]: https://pub.dev/packages/ensure_initialized
 
 [code-factor--badge-url]: https://www.codefactor.io/repository/github/nivisi/ensure_initialized/badge
