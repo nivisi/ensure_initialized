@@ -2,7 +2,7 @@
 
 [![⚙️ CI][ci-badge-url]][ci-url] [![CodeFactor][code-factor--badge-url]][code-factor-app-url]  [![codecov][codecov-badge-url]][codecov-url]
 
-Sometimes objects can perform heavy initialization or preparation that take some time. Until that is done, the object could be not ready for usage. This package allows to await for initialization, ensuring the object is ready to use.
+Sometimes objects may perform long initialization or preparation before they can be used. This package allows to await for initialization and ensure that an object is ready to use.
 
 ## Usage
 
@@ -45,7 +45,7 @@ final object = YourObject();
 
 print(object.isInitialized); // false
 
-await object.init(); // this method calls `initializedSuccessfully` under the hood
+await object.init(); // object method that calls `initializedSuccessfully` under the hood
 
 print(object.isInitialized); // true
 ```
@@ -55,10 +55,13 @@ print(object.isInitialized); // true
 `ensureInitialized` will be released after you call either `initializedSuccessfully`. Do it in your heavy initialization method:
 
 ```dart
-Future<void> init() async {
-  await Future.delayed(const Duration(seconds: 3));
-  
-  initializedSuccessfully();
+```dart
+class YourObject with EnsureInitializedMixin {
+  Future<void> init() async {
+    await Future.delayed(const Duration(seconds: 3));
+
+    initializedSuccessfully();
+  }
 }
 ```
 
@@ -75,11 +78,11 @@ final result = await objectWithResult.ensureInitialized;
 print(result); // prints 5
 ```
 
-### Failed Initialization
+### Initialization Failure
 
-To mark that the object was initialized with an error, call `initializedWithError`. It can take a message, an exception and a stacktrace.
+To mark that the object has failed to initialize, call `initializedWithError`. It can take a message, an exception and a stacktrace.
 
-Note: it is preferrable to use either a message or an exception. You'll get an assertion error in debug otherwise. In release the message will be ignored in case both values are specified.
+Note: you can either use a message or an exception. You'll get an assertion error in debug otherwise.
 
 ```dart
 Future<void> init() async {
